@@ -1,0 +1,207 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+  
+  /* Couleurs gouvernementales officielles */
+  :root {
+    --gov-primary: #1e40af;
+    --gov-secondary: #059669;
+    --gov-accent: #dc2626;
+    --gov-gold: #d97706;
+    --gov-dark: #1f2937;
+    --gov-light: #f8fafc;
+    --gov-border: #e5e7eb;
+    --gov-text: #374151;
+  }
+}
+
+@layer components {
+  /* Composants gouvernementaux */
+  .gov-header {
+    background: linear-gradient(135deg, var(--gov-primary) 0%, var(--gov-dark) 100%);
+    border-bottom: 3px solid var(--gov-gold);
+  }
+  
+  .gov-card {
+    background: white;
+    border: 1px solid var(--gov-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .gov-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .gov-button-primary {
+    background: linear-gradient(135deg, var(--gov-primary) 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.3);
+  }
+  
+  .gov-button-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(30, 64, 175, 0.4);
+  }
+  
+  .gov-button-secondary {
+    background: white;
+    color: var(--gov-primary);
+    border: 2px solid var(--gov-primary);
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .gov-button-secondary:hover {
+    background: var(--gov-primary);
+    color: white;
+  }
+  
+  .gov-badge {
+    background: var(--gov-gold);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .gov-seal {
+    background: radial-gradient(circle, var(--gov-gold) 0%, #b45309 100%);
+    border: 3px solid var(--gov-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+  }
+  
+  /* Animations personnalisées */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Utilitaires gouvernementaux */
+  .gov-gradient {
+    background: linear-gradient(135deg, var(--gov-primary) 0%, var(--gov-secondary) 100%);
+  }
+  
+  .gov-text-gradient {
+    background: linear-gradient(135deg, var(--gov-primary) 0%, var(--gov-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gov-border-gradient {
+    border-image: linear-gradient(135deg, var(--gov-primary), var(--gov-secondary)) 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Styles pour les graphiques */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgb(229, 231, 235);
+}
+
+/* Styles pour les éléments focusables */
+.focus-visible {
+  outline: 2px solid var(--gov-primary);
+  outline-offset: 2px;
+}
+
+/* Amélioration de l'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  *, 
+  *::before, 
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
