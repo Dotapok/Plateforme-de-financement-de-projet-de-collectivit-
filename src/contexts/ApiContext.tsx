@@ -56,6 +56,9 @@ interface ApiProviderProps {
   children: ReactNode;
 }
 
+// Créer le contexte
+const ApiContext = createContext<ApiContextType | undefined>(undefined);
+
 // Configuration des URLs
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backendcollectivite.up.railway.app';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;

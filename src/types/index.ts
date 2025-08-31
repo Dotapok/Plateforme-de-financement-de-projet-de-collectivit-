@@ -66,3 +66,36 @@ export interface Transaction {
     comments?: string;
   };
 }
+
+export interface Evaluation {
+  id: string;
+  projectId: string;
+  evaluatorId: string;
+  score: number;
+  comments: string;
+  timestamp: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  timestamp: string;
+}
+
+export interface ProjectStats {
+  totalProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  averageScore: number;
+}
+
+export interface BudgetStats {
+  totalBudget: number;
+  approvedBudget: number;
+  spentBudget: number;
+  remainingBudget: number;
+}
