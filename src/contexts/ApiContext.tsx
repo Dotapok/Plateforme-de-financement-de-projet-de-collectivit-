@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { User, Project, Transaction, Evaluation, Notification, KPIData, ProjectStats, BudgetStats } from '../types';
+import { API_CONFIG, buildApiUrl, testApiConnectivity } from '../config/api';
 
 interface ApiContextType {
   // État de connexion
@@ -48,6 +49,9 @@ interface ApiContextType {
   // Utilitaires
   joinRoom: (room: string) => void;
   leaveRoom: (room: string) => void;
+  
+  // Test de connectivité
+  testBackendConnection: () => Promise<{ success: boolean; message: string; url: string }>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -56,7 +60,7 @@ interface ApiProviderProps {
   children: ReactNode;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Utilisation de la configuration centralisée
 
 export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -65,7 +69,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
   // Initialisation de Socket.IO
   useEffect(() => {
-    const newSocket = io(API_BASE_URL, {
+    const newSocket = io(API_CONFIG.SOCKET_URL, {
       auth: {
         token: authToken
       },
@@ -128,7 +132,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
   // Fonction utilitaire pour les appels API
   const apiCall = useCallback(async (endpoint: string, options: RequestInit = {}) => {
-    const url = `${API_BASE_URL}/api${endpoint}`;
+    const url = buildApiUrl(endpoint);
     
     const config: RequestInit = {
       ...options,
@@ -354,6 +358,11 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
     }
   }, [socket, isConnected]);
 
+  // Test de connectivité du backend
+  const testBackendConnection = useCallback(async () => {
+    return await testApiConnectivity();
+  }, []);
+
   const contextValue: ApiContextType = {
     isConnected,
     socket,
@@ -383,6 +392,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
     getTransactionStatus,
     joinRoom,
     leaveRoom,
+    testBackendConnection,
   };
 
   return (
