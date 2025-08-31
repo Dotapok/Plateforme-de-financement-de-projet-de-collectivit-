@@ -10,59 +10,52 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user data
-const mockUsers: Record<string, User> = {
-  'ctd.douala': {
-    id: '1',
-    name: 'Marie Ngono',
-    entity: 'Communauté Urbaine de Douala',
-    role: 'ctd',
-    certificateInfo: {
-      issuer: 'AC-CAMEROUN',
-      expiryDate: '2025-12-31',
-      serialNumber: 'CUD2024001',
-      status: 'valid'
-    }
-  },
-  'minddevel.agent': {
-    id: '2',
-    name: 'Jean-Paul Mbarga',
-    entity: 'MINDDEVEL - Région du Centre',
-    role: 'minddevel',
-    certificateInfo: {
-      issuer: 'AC-CAMEROUN',
-      expiryDate: '2025-06-30',
-      serialNumber: 'MDD2024002',
-      status: 'valid'
-    }
-  },
-  'minfi.controller': {
-    id: '3',
-    name: 'Fatima Bello',
-    entity: 'MINFI - Contrôle Budgétaire',
-    role: 'minfi',
-    certificateInfo: {
-      issuer: 'AC-CAMEROUN',
-      expiryDate: '2025-09-15',
-      serialNumber: 'MFI2024003',
-      status: 'valid'
-    }
-  }
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (credentials: { username: string; password: string }): Promise<boolean> => {
-    // Simple mock authentication
-    if (mockUsers[credentials.username] && credentials.password === 'demo123') {
-      setUser(mockUsers[credentials.username]);
-      return true;
+    try {
+      // Utiliser l'API backend pour l'authentification
+      const response = await fetch('https://backendcollectivite.up.railway.app/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          username: credentials.username, 
+          password: credentials.password 
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Échec de la connexion');
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        const { user: userData, token } = data.data;
+        
+        // Stocker le token dans localStorage
+        localStorage.setItem('authToken', token);
+        
+        // Mettre à jour l'état utilisateur
+        setUser(userData);
+        
+        return true;
+      } else {
+        throw new Error(data.message || 'Échec de la connexion');
+      }
+    } catch (error) {
+      console.error('Erreur de connexion:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
+    // Supprimer le token et l'utilisateur
+    localStorage.removeItem('authToken');
     setUser(null);
   };
 

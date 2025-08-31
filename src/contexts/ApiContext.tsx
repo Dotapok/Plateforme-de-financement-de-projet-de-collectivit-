@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { User, Project, Transaction, Evaluation, Notification, KPIData, ProjectStats, BudgetStats } from '../types';
+import { useAuth } from './AuthContext';
 
 interface ApiContextType {
   // État de connexion
@@ -48,12 +49,8 @@ interface ApiContextType {
   // Utilitaires
   joinRoom: (room: string) => void;
   leaveRoom: (room: string) => void;
-  
-  // Test de connectivité
-  testBackendConnection: () => Promise<{ success: boolean; message: string; url: string }>;
+  testBackendConnection: () => Promise<any>;
 }
-
-const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
 interface ApiProviderProps {
   children: ReactNode;
@@ -64,12 +61,29 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backendcollectivit
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;
 
 export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
+  const { user, isAuthenticated } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('authToken'));
+  
+  // Récupérer le token depuis localStorage
+  const getAuthToken = useCallback(() => {
+    return localStorage.getItem('authToken');
+  }, []);
 
   // Initialisation de Socket.IO
   useEffect(() => {
+    if (!isAuthenticated) {
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+        setIsConnected(false);
+      }
+      return;
+    }
+
+    const authToken = getAuthToken();
+    if (!authToken) return;
+
     const newSocket = io(SOCKET_URL, {
       auth: {
         token: authToken
@@ -129,11 +143,12 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
     return () => {
       newSocket.close();
     };
-  }, [authToken]);
+  }, [isAuthenticated, getAuthToken]);
 
   // Fonction utilitaire pour les appels API
   const apiCall = useCallback(async (endpoint: string, options: RequestInit = {}) => {
     const url = `${API_BASE_URL}${endpoint}`;
+    const authToken = getAuthToken();
     
     const config: RequestInit = {
       ...options,
@@ -157,7 +172,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
       console.error(`❌ Erreur API ${endpoint}:`, error);
       throw error;
     }
-  }, [authToken]);
+  }, [getAuthToken]);
 
   // Authentification
   const login = useCallback(async (email: string, password: string) => {
@@ -168,7 +183,6 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
     if (response.success) {
       const { user, token } = response.data;
-      setAuthToken(token);
       localStorage.setItem('authToken', token);
       
       // Reconnecter Socket.IO avec le nouveau token
@@ -191,7 +205,6 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
     if (response.success) {
       const { user, token } = response.data;
-      setAuthToken(token);
       localStorage.setItem('authToken', token);
       
       if (socket) {
@@ -206,7 +219,6 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
   }, [apiCall, socket]);
 
   const logout = useCallback(() => {
-    setAuthToken(null);
     localStorage.removeItem('authToken');
     
     if (socket) {

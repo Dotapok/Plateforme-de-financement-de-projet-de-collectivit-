@@ -31,9 +31,10 @@ export function LoginPage() {
   };
 
   const demoAccounts = [
-    { username: 'ctd.douala', role: 'CTD Douala', entity: 'Communauté Urbaine de Douala' },
-    { username: 'minddevel.agent', role: 'Agent MINDDEVEL', entity: 'MINDDEVEL - Région du Centre' },
-    { username: 'minfi.controller', role: 'Contrôleur MINFI', entity: 'MINFI - Contrôle Budgétaire' }
+    { username: 'admin', role: 'Administrateur', entity: 'DTC EKANI', password: 'Admin@2024' },
+    { username: 'ctd_user', role: 'Agent CTD', entity: 'Commune de Yaoundé I', password: 'Ctd@2024' },
+    { username: 'minddevel_user', role: 'Agent MINDDEVEL', entity: 'MINDDEVEL', password: 'Minddevel@2024' },
+    { username: 'minfi_user', role: 'Agent MINFI', entity: 'MINFI', password: 'Minfi@2024' }
   ];
 
   return (
@@ -161,7 +162,7 @@ export function LoginPage() {
                         {account.username}
                       </span>
                       <button
-                        onClick={() => setCredentials({ username: account.username, password: 'demo123' })}
+                        onClick={() => setCredentials({ username: account.username, password: account.password })}
                         className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                       >
                         Utiliser
