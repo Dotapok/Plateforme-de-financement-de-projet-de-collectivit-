@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { User, Project, Transaction, Evaluation, Notification, KPIData, ProjectStats, BudgetStats } from '../types';
-import { API_CONFIG, buildApiUrl, testApiConnectivity } from '../config/api';
 
 interface ApiContextType {
   // État de connexion
@@ -60,7 +59,9 @@ interface ApiProviderProps {
   children: ReactNode;
 }
 
-// Utilisation de la configuration centralisée
+// Configuration des URLs
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backendcollectivite.up.railway.app';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;
 
 export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -69,7 +70,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
   // Initialisation de Socket.IO
   useEffect(() => {
-    const newSocket = io(API_CONFIG.SOCKET_URL, {
+    const newSocket = io(SOCKET_URL, {
       auth: {
         token: authToken
       },
@@ -132,7 +133,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
   // Fonction utilitaire pour les appels API
   const apiCall = useCallback(async (endpoint: string, options: RequestInit = {}) => {
-    const url = buildApiUrl(endpoint);
+    const url = `${API_BASE_URL}${endpoint}`;
     
     const config: RequestInit = {
       ...options,
@@ -360,7 +361,34 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
   // Test de connectivité du backend
   const testBackendConnection = useCallback(async () => {
-    return await testApiConnectivity();
+    try {
+      const response = await fetch(`${API_BASE_URL}/health`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        return {
+          success: true,
+          message: `API accessible (${response.status})`,
+          url: `${API_BASE_URL}/health`
+        };
+      } else {
+        return {
+          success: false,
+          message: `API accessible mais erreur ${response.status}`,
+          url: `${API_BASE_URL}/health`
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: `Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
+        url: `${API_BASE_URL}/health`
+      };
+    }
   }, []);
 
   const contextValue: ApiContextType = {

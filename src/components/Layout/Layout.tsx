@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import BackendStatus from '../UI/BackendStatus';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface LayoutProps {
@@ -24,7 +23,6 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       {!isAuthenticated && <Footer />}
-      <BackendStatus />
     </div>
   );
 }
