@@ -60,8 +60,8 @@ interface ApiProviderProps {
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
 // Configuration des URLs
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backendcollectivite.up.railway.app';
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backendcollectivite.up.railway.app/api';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://backendcollectivite.up.railway.app';
 
 export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();

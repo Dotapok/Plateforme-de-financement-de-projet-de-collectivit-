@@ -68,31 +68,43 @@ export function DashboardPage() {
   const getRoleSpecificKPIs = () => {
     if (!kpiData) return [];
     
+    // Fonction utilitaire pour sécuriser les valeurs
+    const safeValue = (value: any, defaultValue: string = '0') => {
+      return value != null ? value.toString() : defaultValue;
+    };
+    
+    // Extraire les données avec des valeurs par défaut sécurisées
+    // Note: La structure exacte dépend de la réponse de l'API
+    const totalProjects = kpiData.totalProjects || kpiData.stats?.projects?.totalProjects || 0;
+    const approvedProjects = kpiData.approvedProjects || kpiData.stats?.projects?.completedProjects || 0;
+    const totalBudget = kpiData.totalBudget || kpiData.stats?.projects?.totalBudget || 0;
+    const averageProcessingTime = kpiData.averageProcessingTime || kpiData.stats?.projects?.avgScore || 0;
+    
     switch (user?.role) {
       case 'ctd':
         return [
-          { title: 'Projets Soumis', value: kpiData.totalProjects.toString(), icon: FileText, color: 'text-blue-600', trend: { value: 8, isPositive: true } },
+          { title: 'Projets Soumis', value: safeValue(totalProjects), icon: FileText, color: 'text-blue-600', trend: { value: 8, isPositive: true } },
           { title: 'En Évaluation', value: '7', icon: Clock, color: 'text-yellow-600' },
-          { title: 'Approuvés', value: kpiData.approvedProjects.toString(), icon: CheckCircle, color: 'text-green-600', trend: { value: 12, isPositive: true } },
-          { title: 'Budget Total', value: formatBudgetInMillions(kpiData.totalBudget), icon: DollarSign, color: 'text-purple-600' }
+          { title: 'Approuvés', value: safeValue(approvedProjects), icon: CheckCircle, color: 'text-green-600', trend: { value: 12, isPositive: true } },
+          { title: 'Budget Total', value: formatBudgetInMillions(totalBudget), icon: DollarSign, color: 'text-purple-600' }
         ];
       case 'minddevel':
         return [
           { title: 'À Évaluer', value: '15', icon: AlertCircle, color: 'text-orange-600' },
-          { title: 'Évalués', value: kpiData.approvedProjects.toString(), icon: CheckCircle, color: 'text-green-600', trend: { value: 15, isPositive: true } },
-          { title: 'Délai Moyen', value: `${kpiData.averageProcessingTime}j`, icon: Clock, color: 'text-blue-600', trend: { value: -8, isPositive: true } },
-          { title: 'Taux Approbation', value: `${Math.round((kpiData.approvedProjects / kpiData.totalProjects) * 100)}%`, icon: TrendingUp, color: 'text-purple-600', trend: { value: 5, isPositive: true } }
+          { title: 'Évalués', value: safeValue(approvedProjects), icon: CheckCircle, color: 'text-green-600', trend: { value: 15, isPositive: true } },
+          { title: 'Délai Moyen', value: `${averageProcessingTime}j`, icon: Clock, color: 'text-blue-600', trend: { value: -8, isPositive: true } },
+          { title: 'Taux Approbation', value: `${Math.round((approvedProjects / (totalProjects || 1)) * 100)}%`, icon: TrendingUp, color: 'text-purple-600', trend: { value: 5, isPositive: true } }
         ];
       case 'minfi':
         return [
-          { title: 'Validations', value: kpiData.approvedProjects.toString(), icon: Shield, color: 'text-blue-600', trend: { value: 12, isPositive: true } },
-          { title: 'Budget Engagé', value: formatBudgetInMillions(kpiData.totalBudget), icon: DollarSign, color: 'text-green-600' },
+          { title: 'Validations', value: safeValue(approvedProjects), icon: Shield, color: 'text-blue-600', trend: { value: 12, isPositive: true } },
+          { title: 'Budget Engagé', value: formatBudgetInMillions(totalBudget), icon: DollarSign, color: 'text-green-600' },
           { title: 'En Attente', value: '6', icon: Clock, color: 'text-yellow-600' },
           { title: 'Conformité', value: '95%', icon: CheckCircle, color: 'text-purple-600', trend: { value: 2, isPositive: true } }
         ];
       default:
         return [
-          { title: 'Total Projets', value: kpiData.totalProjects.toString(), icon: FileText, color: 'text-blue-600', trend: { value: 12, isPositive: true } },
+          { title: 'Total Projets', value: safeValue(totalProjects), icon: FileText, color: 'text-blue-600', trend: { value: 12, isPositive: true } },
           { title: 'Utilisateurs Actifs', value: '89', icon: Users, color: 'text-green-600', trend: { value: 8, isPositive: true } },
           { title: 'Transactions', value: '234', icon: TrendingUp, color: 'text-purple-600', trend: { value: 15, isPositive: true } },
           { title: 'Uptime', value: '99.9%', icon: Shield, color: 'text-red-600' }
