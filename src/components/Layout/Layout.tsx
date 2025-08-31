@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { AuthStatus } from '../Auth/AuthStatus';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface LayoutProps {
@@ -13,6 +14,7 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <AuthStatus />
       <Header 
         isMobileMenuOpen={isMobileMenuOpen} 
         setIsMobileMenuOpen={setIsMobileMenuOpen}

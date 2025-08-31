@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, ReactNode } from 'react';
+﻿import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -6,12 +6,53 @@ interface AuthContextType {
   login: (credentials: { username: string; password: string }) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Vérifier le token existant au démarrage
+  useEffect(() => {
+    const checkExistingToken = async () => {
+      const existingToken = localStorage.getItem('authToken');
+      
+      if (existingToken) {
+        try {
+          // Vérifier si le token est encore valide
+          const response = await fetch('https://backendcollectivite.up.railway.app/api/auth/profile', {
+            headers: {
+              'Authorization': `Bearer ${existingToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            if (userData.success) {
+              setUser(userData.data);
+            } else {
+              // Token invalide, le supprimer
+              localStorage.removeItem('authToken');
+            }
+          } else {
+            // Token invalide, le supprimer
+            localStorage.removeItem('authToken');
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification du token:', error);
+          localStorage.removeItem('authToken');
+        }
+      }
+      
+      setIsLoading(false);
+    };
+
+    checkExistingToken();
+  }, []);
 
   const login = async (credentials: { username: string; password: string }): Promise<boolean> => {
     try {
@@ -63,8 +104,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     login,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    isLoading
   };
+
+  // Afficher un loader pendant la vérification du token
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
+  }
 
   return (
     <AuthContext.Provider value={value}>
